@@ -75,7 +75,7 @@ function LeagueContent() {
 
   // Distinct cabs on this day — multi-cab days render as columns.
   const cabs = day
-    ? [...new Set(day.matches.map((m) => m.cab).filter(Boolean))]
+    ? [...new Set(day.matches.flatMap((m) => (m.cab ? [m.cab] : [])))]
     : [];
   const multiCab = cabs.length > 1;
 
