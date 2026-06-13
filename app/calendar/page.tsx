@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { events, defaultHref, type SceneEvent } from "@/lib/events";
+import {
+  events,
+  defaultHref,
+  expandRecurring,
+  type SceneEvent,
+} from "@/lib/events";
 import { season, leagueDays, parseISODate } from "@/lib/league";
 
 type CalEvent = Omit<SceneEvent, "kind"> & {
@@ -10,8 +15,10 @@ type CalEvent = Omit<SceneEvent, "kind"> & {
   href?: string;
 };
 
-// League days come in automatically; everything else from lib/events.ts.
-const allEvents: CalEvent[] = [
+// One-off events + league days. The recurring weekly nights are generated
+// per-view inside the component (see expandRecurring) so they appear on
+// every month without hand-entering dates.
+const baseEvents: CalEvent[] = [
   ...events.map((e) => ({ ...e, href: defaultHref(e) })),
   ...leagueDays.map((d) => ({
     date: d.date,
@@ -21,13 +28,20 @@ const allEvents: CalEvent[] = [
     venue: d.venue,
     href: `/league?date=${d.date}`,
   })),
-].sort((a, b) => a.date.localeCompare(b.date));
+];
 
 const kindStyles: Record<string, string> = {
   league: "bg-amber-400/15 text-amber-300 border-amber-400/30",
   pickup: "bg-stone-800 text-stone-200 border-stone-700",
   tournament: "bg-rose-400/15 text-rose-300 border-rose-400/30",
   social: "bg-emerald-400/15 text-emerald-300 border-emerald-400/30",
+};
+
+const dotStyles: Record<string, string> = {
+  league: "bg-amber-400/60",
+  pickup: "bg-stone-600",
+  tournament: "bg-rose-400/60",
+  social: "bg-emerald-400/60",
 };
 
 function iso(y: number, m: number, d: number) {
@@ -50,12 +64,23 @@ export default function CalendarPage() {
   const [view, setView] = useState({ y: now.getFullYear(), m: now.getMonth() });
 
   const first = new Date(view.y, view.m, 1);
-  const startDow = first.getDay();
+  // Monday-first week: push Sunday (getDay() === 0) to the last column.
+  const startOffset = (first.getDay() + 6) % 7;
   const daysInMonth = new Date(view.y, view.m + 1, 0).getDate();
   const todayISO = iso(now.getFullYear(), now.getMonth(), now.getDate());
 
+  const monthStart = iso(view.y, view.m, 1);
+  const monthEnd = iso(view.y, view.m, daysInMonth);
+
+  // Everything happening in the visible month: in-range one-offs/league
+  // days plus the recurring nights generated for this month.
+  const monthEvents: CalEvent[] = [
+    ...baseEvents.filter((e) => e.date >= monthStart && e.date <= monthEnd),
+    ...expandRecurring(monthStart, monthEnd),
+  ].sort((a, b) => a.date.localeCompare(b.date));
+
   const byDate = new Map<string, CalEvent[]>();
-  for (const e of allEvents) {
+  for (const e of monthEvents) {
     byDate.set(e.date, [...(byDate.get(e.date) ?? []), e]);
   }
 
@@ -69,12 +94,26 @@ export default function CalendarPage() {
     setView({ y: d.getFullYear(), m: d.getMonth() });
   }
 
-  const upcoming = allEvents
-    .filter((e) => parseISODate(e.date) >= new Date(todayISO + "T00:00"))
+  // "Upcoming": the next things across month boundaries (future one-offs/
+  // league days + recurring nights for the next several weeks).
+  const horizon = new Date(now);
+  horizon.setDate(horizon.getDate() + 45);
+  const horizonISO = iso(
+    horizon.getFullYear(),
+    horizon.getMonth(),
+    horizon.getDate()
+  );
+  const upcoming: CalEvent[] = [
+    ...baseEvents.filter(
+      (e) => parseISODate(e.date) >= new Date(todayISO + "T00:00")
+    ),
+    ...expandRecurring(todayISO, horizonISO),
+  ]
+    .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 8);
 
   const cells: (number | null)[] = [
-    ...Array.from({ length: startDow }, () => null),
+    ...Array.from({ length: startOffset }, () => null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
@@ -106,10 +145,11 @@ export default function CalendarPage() {
         </div>
       </section>
 
-      <section>
+      {/* Tablet / desktop: month grid (hidden on phones — too cramped). */}
+      <section className="hidden sm:block">
         <p className="text-lg font-semibold text-stone-100">{monthName}</p>
         <div className="mt-3 grid grid-cols-7 text-center font-pixel text-[10px] text-stone-500">
-          {["sun", "mon", "tue", "wed", "thu", "fri", "sat"].map((d) => (
+          {["mon", "tue", "wed", "thu", "fri", "sat", "sun"].map((d) => (
             <div key={d} className="pb-2">
               {d}
             </div>
@@ -154,7 +194,7 @@ export default function CalendarPage() {
           </span>
           <span>
             <span className="inline-block w-2.5 h-2.5 rounded-sm bg-stone-600 me-1.5" />
-            Pickup (tap to vote)
+            Pickup
           </span>
           <span>
             <span className="inline-block w-2.5 h-2.5 rounded-sm bg-rose-400/60 me-1.5" />
@@ -164,6 +204,69 @@ export default function CalendarPage() {
             <span className="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-400/60 me-1.5" />
             Social
           </span>
+        </div>
+      </section>
+
+      {/* Phones: a readable agenda list of the month instead of the grid. */}
+      <section className="sm:hidden">
+        <p className="text-lg font-semibold text-stone-100">{monthName}</p>
+        <div className="mt-3 flex flex-col gap-2">
+          {monthEvents.length === 0 && (
+            <p className="text-stone-400 text-sm">
+              Nothing scheduled this month.
+            </p>
+          )}
+          {monthEvents.map((e, i) => {
+            const d = parseISODate(e.date);
+            const isToday = e.date === todayISO;
+            const inner = (
+              <>
+                <div className="w-11 shrink-0 text-center">
+                  <div className="font-pixel text-[9px] uppercase text-stone-500">
+                    {d.toLocaleDateString("en-US", { weekday: "short" })}
+                  </div>
+                  <div
+                    className={`text-lg font-bold leading-tight ${
+                      isToday ? "text-amber-400" : "text-stone-200"
+                    }`}
+                  >
+                    {d.getDate()}
+                  </div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`inline-block h-2 w-2 shrink-0 rounded-sm ${
+                        dotStyles[e.kind] ?? dotStyles.pickup
+                      }`}
+                    />
+                    <span className="font-medium text-stone-100">{e.title}</span>
+                  </div>
+                  {(e.time || e.venue) && (
+                    <p className="mt-0.5 text-sm text-stone-400">
+                      {[e.time, e.venue].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                </div>
+              </>
+            );
+            const cls = `rounded-lg border p-3 flex items-center gap-3 ${
+              isToday ? "border-amber-400/40 bg-amber-400/5" : "border-stone-800"
+            }`;
+            return e.href ? (
+              <Link
+                key={i}
+                href={e.href}
+                className={`${cls} hover:border-amber-400 transition-colors`}
+              >
+                {inner}
+              </Link>
+            ) : (
+              <div key={i} className={cls}>
+                {inner}
+              </div>
+            );
+          })}
         </div>
       </section>
 

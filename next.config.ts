@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname),
   },
+
+  // BARE-BONES PROOF OF CONCEPT: send the root straight to the Calendar.
+  // The Home page (app/page.tsx) is left intact — delete this redirect to
+  // bring it back. `permanent: false` (307) so browsers don't hard-cache it.
+  async redirects() {
+    return [{ source: "/", destination: "/calendar", permanent: false }];
+  },
 };
 
 export default nextConfig;

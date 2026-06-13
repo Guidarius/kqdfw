@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Space_Grotesk, Silkscreen } from "next/font/google";
-import { links } from "@/lib/scene";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -21,12 +20,12 @@ export const metadata: Metadata = {
     "The Dallas–Fort Worth Killer Queen Arcade community. League schedule, standings, and where to play.",
 };
 
+// Bare-bones proof of concept: only Calendar and League for now.
+// Hidden (pages still exist, just unlinked): Home, Where to Play (/locations),
+// Join (/join), Members (/members). Add them back here to re-enable.
 const nav = [
-  { href: "/", label: "Home" },
   { href: "/calendar", label: "Calendar" },
   { href: "/league", label: "League" },
-  { href: "/locations", label: "Where to Play" },
-  { href: "/join", label: "Join" },
 ];
 
 export default function RootLayout({
@@ -44,7 +43,7 @@ export default function RootLayout({
         <header className="border-b border-stone-800">
           <div className="mx-auto max-w-4xl px-5 py-4 flex flex-wrap items-center gap-x-6 gap-y-2">
             <Link
-              href="/"
+              href="/calendar"
               className="font-pixel text-amber-400 text-base tracking-wide"
             >
               KQ<span className="text-stone-100">DFW</span>
@@ -60,14 +59,6 @@ export default function RootLayout({
                 </Link>
               ))}
             </nav>
-            <div className="ms-auto">
-              <Link
-                href="/members"
-                className="text-sm text-stone-400 hover:text-amber-400 transition-colors"
-              >
-                Members
-              </Link>
-            </div>
           </div>
         </header>
 
@@ -75,24 +66,12 @@ export default function RootLayout({
           {children}
         </main>
 
+        {/* Footer links (Community standards / Instagram / Facebook / Twitch /
+            HiveMind) are hidden for the bare-bones proof of concept. Restore
+            from git history when ready. */}
         <footer className="border-t border-stone-800 text-sm text-stone-400">
           <div className="mx-auto max-w-4xl px-5 py-8 flex flex-wrap items-center gap-x-6 gap-y-2">
             <span>© {new Date().getFullYear()} KQDFW</span>
-            <Link href="/conduct" className="hover:text-amber-400">
-              Community standards
-            </Link>
-            <a href={links.instagram} className="hover:text-amber-400">
-              Instagram
-            </a>
-            <a href={links.facebook} className="hover:text-amber-400">
-              Facebook
-            </a>
-            <a href={links.twitch} className="hover:text-amber-400">
-              Twitch
-            </a>
-            <a href={links.hivemind} className="hover:text-amber-400">
-              HiveMind stats
-            </a>
           </div>
         </footer>
       </body>
