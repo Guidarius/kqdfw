@@ -263,7 +263,7 @@ function LeagueContent() {
         </div>
         <p className="mt-2 text-xs text-stone-500">
           Computed from entered match scores. Standings are approximate until
-          finalized after Decision Sunday.
+          finalized after the final league day.
         </p>
       </section>
 

@@ -9,11 +9,11 @@ const nextConfig: NextConfig = {
     root: path.join(__dirname),
   },
 
-  // BARE-BONES PROOF OF CONCEPT: send the root straight to the Calendar.
+  // BARE-BONES PROOF OF CONCEPT: send the root straight to the League page.
   // The Home page (app/page.tsx) is left intact — delete this redirect to
   // bring it back. `permanent: false` (307) so browsers don't hard-cache it.
   async redirects() {
-    return [{ source: "/", destination: "/calendar", permanent: false }];
+    return [{ source: "/", destination: "/league", permanent: false }];
   },
 };
 

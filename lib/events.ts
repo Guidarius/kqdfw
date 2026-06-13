@@ -67,7 +67,7 @@ export const recurringEvents: RecurringEvent[] = [
     title: "Pickup Games",
     kind: "pickup",
     time: "8:00 PM",
-    venue: "Free Play Arlington",
+    venue: "Tokyo Station (Arlington)",
   },
   {
     weekday: 4, // Thursday

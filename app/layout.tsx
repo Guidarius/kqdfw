@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 // Hidden (pages still exist, just unlinked): Home, Where to Play (/locations),
 // Join (/join), Members (/members). Add them back here to re-enable.
 const nav = [
-  { href: "/calendar", label: "Calendar" },
   { href: "/league", label: "League" },
+  { href: "/calendar", label: "Calendar" },
 ];
 
 export default function RootLayout({
@@ -43,7 +43,7 @@ export default function RootLayout({
         <header className="border-b border-stone-800">
           <div className="mx-auto max-w-4xl px-5 py-4 flex flex-wrap items-center gap-x-6 gap-y-2">
             <Link
-              href="/calendar"
+              href="/league"
               className="font-pixel text-amber-400 text-base tracking-wide"
             >
               KQ<span className="text-stone-100">DFW</span>

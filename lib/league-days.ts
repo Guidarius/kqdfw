@@ -17,7 +17,7 @@ import type { LeagueDay } from "./league";
 export const leagueDays: LeagueDay[] = [
   {
     date: "2026-06-14",
-    name: "Opening Day",
+    name: "League",
     venue: "Free Play Dallas",
     matches: [
       // Cab 1
@@ -46,7 +46,7 @@ export const leagueDays: LeagueDay[] = [
   },
   {
     date: "2026-06-21",
-    name: "Week 2",
+    name: "League",
     venue: "Tokyo Station (Arlington)",
     matches: [
       { time: "4:00 PM", blue: "Battlehive Apis", gold: "Bear Minimum" },
@@ -61,7 +61,7 @@ export const leagueDays: LeagueDay[] = [
   },
   {
     date: "2026-06-28",
-    name: "Week 3",
+    name: "League",
     venue: "Free Play Richardson",
     matches: [
       { time: "4:00 PM", blue: "Battlehive Apis", gold: "Death From Above" },
@@ -76,7 +76,7 @@ export const leagueDays: LeagueDay[] = [
   },
   {
     date: "2026-07-05",
-    name: "Decision Sunday",
+    name: "League",
     venue: "Free Play Dallas",
     matches: [
       // Cab 1
@@ -108,6 +108,6 @@ export const leagueDays: LeagueDay[] = [
     name: "Honey Pot Playoffs",
     venue: "Free Play Dallas",
     matches: [],
-    note: "Bracket set after Decision Sunday",
+    note: "Bracket set after the final league day",
   },
 ];

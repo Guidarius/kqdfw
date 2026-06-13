@@ -61,9 +61,9 @@ export const venues = [
     maps: "https://www.google.com/maps/search/Free+Play+Richardson+TX",
   },
   {
-    name: "Free Play Arlington",
+    name: "Tokyo Station (Arlington)",
     area: "Arlington",
-    maps: "https://www.google.com/maps/search/Free+Play+Arlington+TX",
+    maps: "https://www.google.com/maps/search/Tokyo+Station+Arlington+TX",
   },
   {
     name: "Free Play Denton",
