@@ -22,16 +22,31 @@ body {
   color: #0c0a09;
 }
 
-/* Marquee strip — used once, at the very top of the site */
+/* ----------------------------------------------------------------
+   Arcade design system — small, intentional set of utilities used
+   across the site. Keep additions here cohesive with the dark +
+   amber cabinet look. All motion is disabled under reduced-motion.
+   ---------------------------------------------------------------- */
+
+/* Marquee strip — the amber cabinet stripe at the very top.
+   Now scrolls like a real arcade marquee. */
 .marquee {
   background: repeating-linear-gradient(
     90deg,
     #f59e0b 0 14px,
     transparent 14px 22px
   );
+  background-size: 22px 100%;
+  animation: marquee-scroll 0.8s linear infinite;
 }
 
-/* Insert-coin cursor — used on exactly one CTA */
+@keyframes marquee-scroll {
+  to {
+    background-position: 22px 0;
+  }
+}
+
+/* Insert-coin cursor — blinking CTA accent. */
 .blink {
   animation: blink 1.2s step-end infinite;
 }
@@ -42,8 +57,99 @@ body {
   }
 }
 
+/* Amber neon glow — for the wordmark and primary CTAs. */
+.glow-amber {
+  text-shadow:
+    0 0 6px rgba(245, 158, 11, 0.55),
+    0 0 18px rgba(245, 158, 11, 0.35);
+}
+.glow-amber-box {
+  box-shadow:
+    0 0 0 1px rgba(245, 158, 11, 0.4),
+    0 0 22px -4px rgba(245, 158, 11, 0.45);
+}
+
+/* Card — the repeated bordered panel, in one place. */
+.card {
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-stone-800, #292524);
+  background: rgba(28, 25, 23, 0.35);
+  padding: 1.25rem;
+}
+
+/* Arcade button — pressable cabinet-style CTA. */
+.btn-arcade {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-stone-700, #44403c);
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.05s ease;
+}
+.btn-arcade:hover {
+  border-color: #fbbf24;
+}
+.btn-arcade:active {
+  transform: translateY(1px);
+}
+.btn-arcade-primary {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  color: #fcd34d;
+}
+.btn-arcade-primary:hover {
+  border-color: #fbbf24;
+  box-shadow: 0 0 22px -6px rgba(245, 158, 11, 0.6);
+}
+
+/* Photo frame — gives every photo (and placeholder) a cohesive
+   amber-edged, faintly scan-lined look. */
+.photo-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  background: #14110f;
+}
+.photo-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.18) 0 1px,
+    transparent 1px 3px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+}
+
+/* Styled placeholder shown when a photo `src` is empty — looks
+   intentional, never a broken-image icon. */
+.photo-placeholder {
+  background:
+    radial-gradient(
+      120% 120% at 50% 0%,
+      rgba(245, 158, 11, 0.12),
+      transparent 60%
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(120, 113, 108, 0.08) 0 10px,
+      transparent 10px 20px
+    ),
+    #14110f;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .blink {
+  .blink,
+  .marquee {
     animation: none;
   }
 }

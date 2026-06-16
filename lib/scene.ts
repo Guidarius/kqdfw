@@ -54,6 +54,51 @@ export const thisWeek = {
   detail: "",
 };
 
+// ============================================================
+// VISUALS — photos that make the site feel like a real, fun
+// scene. Drop image files into /public/images and point to them
+// here. Leave `src` empty ("") to show a styled placeholder
+// instead of a broken image — see /public/images/README.md.
+// ============================================================
+
+export type Photo = {
+  src: string; // e.g. "/images/gallery/league-night.jpg" — "" shows a placeholder
+  alt: string; // describe the photo (also used as the placeholder caption)
+  credit?: string; // optional photographer / source credit
+};
+
+// The KQDFW logo. Leave `src` empty to show the text wordmark
+// "KQ DFW" instead. Drop a transparent PNG/SVG in /public/images/logo.
+export const logo: { src: string; alt: string } = {
+  src: "", // EDIT: "/images/logo/kqdfw.png"
+  alt: "KQDFW logo",
+};
+
+// Big banner image at the top of the home page. A wide, lively
+// shot of a packed cabinet or league night works best.
+export const hero: {
+  image: Photo;
+  tagline: string;
+} = {
+  image: {
+    src: "", // EDIT: "/images/hero/your-photo.jpg" (wide ~1920×1080)
+    alt: "Killer Queen DFW night — a crowd around the cabinet",
+  },
+  tagline: "10-player arcade Killer Queen across the metroplex.",
+};
+
+// Photo wall that shows off the community. Square-ish shots of
+// people playing, crowds, teams, trophies — anything with energy.
+// Add as many as you like; the grid adapts. Empty `src` = placeholder.
+export const gallery: Photo[] = [
+  { src: "", alt: "Players mid-match at the cabinet" },
+  { src: "", alt: "The crowd watching a close game" },
+  { src: "", alt: "Blue team celebrating a win" },
+  { src: "", alt: "League night at Free Play" },
+  { src: "", alt: "New player's first game" },
+  { src: "", alt: "Post-game hangout" },
+];
+
 export const venues = [
   {
     name: "Free Play Richardson",

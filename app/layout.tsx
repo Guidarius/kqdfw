@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Space_Grotesk, Silkscreen } from "next/font/google";
 import "./globals.css";
+import { links } from "@/lib/scene";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space",
@@ -20,12 +21,13 @@ export const metadata: Metadata = {
     "The Dallas–Fort Worth Killer Queen Arcade community. League schedule, standings, and where to play.",
 };
 
-// Bare-bones proof of concept: only Calendar and League for now.
-// Hidden (pages still exist, just unlinked): Home, Where to Play (/locations),
-// Join (/join), Members (/members). Add them back here to re-enable.
 const nav = [
+  { href: "/", label: "Home" },
   { href: "/league", label: "League" },
   { href: "/calendar", label: "Calendar" },
+  { href: "/join", label: "Join" },
+  // /admin is intentionally not linked in the public nav — it gates
+  // itself to organizers. Navigate to it directly.
 ];
 
 export default function RootLayout({
@@ -39,12 +41,12 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${silkscreen.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <div aria-hidden className="marquee h-1" />
-        <header className="border-b border-stone-800">
+        <div aria-hidden className="marquee h-1.5" />
+        <header className="border-b border-stone-800 bg-[#0e0c0a]/80 backdrop-blur">
           <div className="mx-auto max-w-4xl px-5 py-4 flex flex-wrap items-center gap-x-6 gap-y-2">
             <Link
-              href="/league"
-              className="font-pixel text-amber-400 text-base tracking-wide"
+              href="/"
+              className="font-pixel text-amber-400 text-base tracking-wide glow-amber"
             >
               KQ<span className="text-stone-100">DFW</span>
             </Link>
@@ -66,12 +68,44 @@ export default function RootLayout({
           {children}
         </main>
 
-        {/* Footer links (Community standards / Instagram / Facebook / Twitch /
-            HiveMind) are hidden for the bare-bones proof of concept. Restore
-            from git history when ready. */}
         <footer className="border-t border-stone-800 text-sm text-stone-400">
-          <div className="mx-auto max-w-4xl px-5 py-8 flex flex-wrap items-center gap-x-6 gap-y-2">
-            <span>© {new Date().getFullYear()} KQDFW</span>
+          <div className="mx-auto max-w-4xl px-5 py-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <span className="font-pixel text-xs text-amber-500">
+              KQ<span className="text-stone-300">DFW</span>
+            </span>
+            <nav className="flex flex-wrap gap-x-5 gap-y-1">
+              <a
+                href={links.instagram}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-amber-400 transition-colors"
+              >
+                Instagram
+              </a>
+              <a
+                href={links.facebook}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-amber-400 transition-colors"
+              >
+                Facebook
+              </a>
+              <a
+                href={links.twitch}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-amber-400 transition-colors"
+              >
+                Twitch
+              </a>
+              <Link
+                href="/conduct"
+                className="hover:text-amber-400 transition-colors"
+              >
+                Community standards
+              </Link>
+            </nav>
+            <span className="ms-auto">© {new Date().getFullYear()} KQDFW</span>
           </div>
         </footer>
       </body>

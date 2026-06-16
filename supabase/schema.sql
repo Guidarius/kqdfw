@@ -132,3 +132,135 @@ begin
     group by v.option_index;
 end;
 $$;
+
+-- ============================================================
+-- ADMIN / CONTENT MANAGEMENT
+-- ------------------------------------------------------------
+-- The calendar, league schedule + scores, and rosters are edited
+-- live from the /admin page by "organizer" members. Everything
+-- here is PUBLIC-READABLE (so the site can render it) but only
+-- writable by organizers, enforced by RLS via is_organizer().
+--
+-- Bootstrapping your first organizer (one-time, in the dashboard):
+--   Table Editor -> members -> set role = 'organizer' on your row.
+-- (You also still want status = 'approved' for the members area.)
+-- ============================================================
+
+-- Add an organizer role to members. Safe to re-run.
+alter table public.members
+  add column if not exists role text not null default 'member'
+    check (role in ('member', 'organizer'));
+
+-- Helper: is the current user an organizer? (mirrors is_approved())
+create or replace function public.is_organizer()
+returns boolean
+language sql stable security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.members
+    where id = auth.uid() and role = 'organizer'
+  );
+$$;
+
+-- Apply the standard "public read, organizer write" pair to a table.
+-- (Written out per-table below so it's explicit and easy to audit.)
+
+-- ---- TEAMS & ROSTERS ----------------------------------------
+create table if not exists public.teams (
+  id bigint generated always as identity primary key,
+  name text not null unique,
+  captain text not null default '',
+  players jsonb not null default '[]', -- JSON array of non-captain names
+  sort int not null default 0,
+  created_at timestamptz not null default now()
+);
+alter table public.teams enable row level security;
+create policy "public read teams" on public.teams
+  for select to anon, authenticated using (true);
+create policy "organizers write teams" on public.teams
+  for all to authenticated
+  using (public.is_organizer()) with check (public.is_organizer());
+
+-- ---- SEASON (single settings row, id = 1) -------------------
+create table if not exists public.season (
+  id int primary key default 1,
+  name text not null default '',
+  day text not null default '',
+  time text not null default '',
+  constraint season_singleton check (id = 1)
+);
+alter table public.season enable row level security;
+create policy "public read season" on public.season
+  for select to anon, authenticated using (true);
+create policy "organizers write season" on public.season
+  for all to authenticated
+  using (public.is_organizer()) with check (public.is_organizer());
+
+-- ---- LEAGUE DAYS + MATCHES ----------------------------------
+create table if not exists public.league_days (
+  id bigint generated always as identity primary key,
+  date date not null,
+  name text not null default 'League',
+  venue text not null default '',
+  note text,
+  created_at timestamptz not null default now()
+);
+alter table public.league_days enable row level security;
+create policy "public read league_days" on public.league_days
+  for select to anon, authenticated using (true);
+create policy "organizers write league_days" on public.league_days
+  for all to authenticated
+  using (public.is_organizer()) with check (public.is_organizer());
+
+create table if not exists public.matches (
+  id bigint generated always as identity primary key,
+  league_day_id bigint not null
+    references public.league_days (id) on delete cascade,
+  time text not null default '',
+  cab text, -- "Cab 1"/"Cab 2"; null for single-cab venues
+  blue text not null default '',
+  gold text not null default '',
+  blue_score int, -- null until played; set both to record a result
+  gold_score int,
+  sort int not null default 0
+);
+alter table public.matches enable row level security;
+create policy "public read matches" on public.matches
+  for select to anon, authenticated using (true);
+create policy "organizers write matches" on public.matches
+  for all to authenticated
+  using (public.is_organizer()) with check (public.is_organizer());
+
+-- ---- EVENTS (one-off) + RECURRING WEEKLY EVENTS -------------
+create table if not exists public.events (
+  id bigint generated always as identity primary key,
+  date date not null,
+  title text not null,
+  kind text not null check (kind in ('pickup', 'tournament', 'social')),
+  time text,
+  venue text,
+  href text
+);
+alter table public.events enable row level security;
+create policy "public read events" on public.events
+  for select to anon, authenticated using (true);
+create policy "organizers write events" on public.events
+  for all to authenticated
+  using (public.is_organizer()) with check (public.is_organizer());
+
+create table if not exists public.recurring_events (
+  id bigint generated always as identity primary key,
+  weekday int not null check (weekday between 0 and 6), -- 0=Sun .. 6=Sat
+  title text not null,
+  kind text not null check (kind in ('pickup', 'tournament', 'social')),
+  time text,
+  venue text,
+  href text
+);
+alter table public.recurring_events enable row level security;
+create policy "public read recurring_events" on public.recurring_events
+  for select to anon, authenticated using (true);
+create policy "organizers write recurring_events" on public.recurring_events
+  for all to authenticated
+  using (public.is_organizer()) with check (public.is_organizer());

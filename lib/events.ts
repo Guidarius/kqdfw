@@ -81,13 +81,17 @@ export const recurringEvents: RecurringEvent[] = [
 // Expand the recurring events into concrete dated events across an
 // inclusive ISO date range (one month for the grid, a look-ahead
 // window for "Upcoming").
-export function expandRecurring(startISO: string, endISO: string): SceneEvent[] {
+export function expandRecurring(
+  recurring: RecurringEvent[],
+  startISO: string,
+  endISO: string
+): SceneEvent[] {
   const out: SceneEvent[] = [];
   const start = new Date(startISO + "T00:00");
   const end = new Date(endISO + "T00:00");
   for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     const wd = d.getDay();
-    for (const r of recurringEvents) {
+    for (const r of recurring) {
       if (r.weekday !== wd) continue;
       const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
         2,

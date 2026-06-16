@@ -111,11 +111,19 @@ export type Standing = {
   mapWins: number;
 };
 
-export function computeStandings(): Standing[] {
+// Compute standings from a roster + a set of league days. Pass DB-sourced
+// data (see lib/data/league.ts) or the constants above — same shapes.
+export function computeStandings(
+  teamList: Team[] = teams,
+  days: LeagueDay[] = leagueDays
+): Standing[] {
   const rec = new Map<string, Standing>(
-    teams.map((t) => [t.name, { name: t.name, wins: 0, losses: 0, mapWins: 0 }])
+    teamList.map((t) => [
+      t.name,
+      { name: t.name, wins: 0, losses: 0, mapWins: 0 },
+    ])
   );
-  for (const day of leagueDays) {
+  for (const day of days) {
     for (const m of day.matches) {
       if (!m.score) continue;
       const blue = rec.get(m.blue);
